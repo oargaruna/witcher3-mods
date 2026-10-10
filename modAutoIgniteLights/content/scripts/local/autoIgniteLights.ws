@@ -1,0 +1,72 @@
+/***********************************************************************/
+/** Auto Ignite Lights
+/** Lights candles, torches and any other light source Igni can light
+/** within a fixed radius of the player, the same way an Igni hit would.
+/**
+/** Requires game version 4.04a or newer (script annotations).
+/** No vanilla script files are edited, so Script Merger has nothing
+/** to merge for this mod.
+/***********************************************************************/
+
+// Radius around the player, in meters, in which lights are ignited.
+function AIL_Radius() : float			{ return 10.0; }
+
+// Seconds between two scans of the surroundings.
+function AIL_Interval() : float			{ return 1.0; }
+
+// Upper bound on entities returned by a single scan.
+function AIL_MaxResults() : int			{ return 200; }
+
+
+@wrapMethod(CR4Player)
+function OnSpawned( spawnData : SEntitySpawnData )
+{
+	var ret : bool;
+
+	ret = wrappedMethod( spawnData );
+	AddTimer( 'AIL_IgniteNearbyLights', AIL_Interval(), true );
+	return ret;
+}
+
+@addMethod(CR4Player)
+timer function AIL_IgniteNearbyLights( dt : float, id : int )
+{
+	var entities : array< CGameplayEntity >;
+	var lightComp : CGameplayLightComponent;
+	var raining : bool;
+	var i : int;
+
+	// Leave staged lighting in dialogues and cutscenes alone.
+	if( theGame.IsDialogOrCutscenePlaying() || theGame.IsFading() )
+	{
+		return;
+	}
+
+	raining = GetRainStrength() > 0.1;
+
+	FindGameplayEntitiesInRange( entities, this, AIL_Radius(), AIL_MaxResults() );
+
+	for( i = 0; i < entities.Size(); i += 1 )
+	{
+		lightComp = (CGameplayLightComponent)entities[i].GetComponentByClassName( 'CGameplayLightComponent' );
+		if( !lightComp || lightComp.IsLightOn() )
+		{
+			continue;
+		}
+
+		// Street lamps follow the game's day/night schedule.
+		if( lightComp.IsCityLight() )
+		{
+			continue;
+		}
+
+		// Rain puts these out; relighting them would just flicker.
+		if( raining && lightComp.IsAffectedByWeather() )
+		{
+			continue;
+		}
+
+		// Same call Igni makes: skips lights a quest has made non-interactive.
+		lightComp.IgniHit();
+	}
+}
