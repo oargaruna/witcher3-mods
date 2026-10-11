@@ -65,8 +65,17 @@ timer function AIL_IgniteNearbyLights( dt : float, id : int )
 				continue;
 			}
 
-			// Same call Igni makes: skips lights a quest has made non-interactive.
-			lightComp.IgniHit();
+			if( lightComp.IsInteractive() )
+			{
+				// Same call Igni makes.
+				lightComp.IgniHit();
+			}
+			else if( lightComp.IsEnabled() )
+			{
+				// Igni can't light this one, but its interact prompt is on,
+				// so Geralt could still light it by hand.
+				lightComp.SetLight( true );
+			}
 		}
 	}
 }

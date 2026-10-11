@@ -31,9 +31,10 @@ Merger, you can still run it; it will not list this mod.
 - The surroundings are scanned once a second, within a 10 meter radius.
   To change either value, edit `AIL_Radius()` or `AIL_Interval()` at the top
   of `autoIgniteLights.ws`.
-- Each light is lit with the same call Igni uses, so lights a quest has
-  locked against Igni stay as the quest set them, and lighting them does not
-  count as the player lighting them for quest objectives.
+- A light is lit if Geralt could light it himself, with Igni or with the
+  interact button. Lights a quest has locked against both stay as the quest
+  set them, and auto-lighting does not count as the player lighting them for
+  quest objectives.
 - Skipped on purpose: lights that rain puts out while it is raining, and
   anything during dialogues and cutscenes.
 
