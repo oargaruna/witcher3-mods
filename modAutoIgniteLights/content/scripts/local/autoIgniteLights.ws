@@ -15,7 +15,7 @@ function AIL_Radius() : float			{ return 10.0; }
 function AIL_Interval() : float			{ return 1.0; }
 
 // Upper bound on entities returned by a single scan.
-function AIL_MaxResults() : int			{ return 200; }
+function AIL_MaxResults() : int			{ return 1000; }
 
 
 @wrapMethod(CR4Player)
@@ -32,9 +32,10 @@ function OnSpawned( spawnData : SEntitySpawnData )
 timer function AIL_IgniteNearbyLights( dt : float, id : int )
 {
 	var entities : array< CGameplayEntity >;
+	var lights : array< CComponent >;
 	var lightComp : CGameplayLightComponent;
 	var raining : bool;
-	var i : int;
+	var i, j : int;
 
 	// Leave staged lighting in dialogues and cutscenes alone.
 	if( theGame.IsDialogOrCutscenePlaying() || theGame.IsFading() )
@@ -48,25 +49,24 @@ timer function AIL_IgniteNearbyLights( dt : float, id : int )
 
 	for( i = 0; i < entities.Size(); i += 1 )
 	{
-		lightComp = (CGameplayLightComponent)entities[i].GetComponentByClassName( 'CGameplayLightComponent' );
-		if( !lightComp || lightComp.IsLightOn() )
+		// Some props carry more than one light, so check every one of them.
+		lights = entities[i].GetComponentsByClassName( 'CGameplayLightComponent' );
+		for( j = 0; j < lights.Size(); j += 1 )
 		{
-			continue;
-		}
+			lightComp = (CGameplayLightComponent)lights[j];
+			if( !lightComp || lightComp.IsLightOn() )
+			{
+				continue;
+			}
 
-		// Street lamps follow the game's day/night schedule.
-		if( lightComp.IsCityLight() )
-		{
-			continue;
-		}
+			// Rain puts these out; relighting them would just flicker.
+			if( raining && lightComp.IsAffectedByWeather() )
+			{
+				continue;
+			}
 
-		// Rain puts these out; relighting them would just flicker.
-		if( raining && lightComp.IsAffectedByWeather() )
-		{
-			continue;
+			// Same call Igni makes: skips lights a quest has made non-interactive.
+			lightComp.IgniHit();
 		}
-
-		// Same call Igni makes: skips lights a quest has made non-interactive.
-		lightComp.IgniHit();
 	}
 }

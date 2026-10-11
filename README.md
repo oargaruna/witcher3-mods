@@ -34,9 +34,8 @@ Merger, you can still run it; it will not list this mod.
 - Each light is lit with the same call Igni uses, so lights a quest has
   locked against Igni stay as the quest set them, and lighting them does not
   count as the player lighting them for quest objectives.
-- Skipped on purpose: street lamps that follow the day/night cycle, lights
-  that rain puts out while it is raining, and anything during dialogues and
-  cutscenes.
+- Skipped on purpose: lights that rain puts out while it is raining, and
+  anything during dialogues and cutscenes.
 
 ### Uninstalling
 
